@@ -26,41 +26,64 @@ hoteis = [
 
 
 class Hoteis(Resource):
+
     def get(self):
         return {'hoteis': hoteis}
 
 
 class Hotel(Resource):
-    def get(self, hotel_id):
+
+    argumentos = reqparse.RequestParser()
+    argumentos.add_argument('nome')
+    argumentos.add_argument('estrelas')
+    argumentos.add_argument('diaria')
+    argumentos.add_argument('cidade')
+
+    def encontrar_hotel(self, hotel_id):
         for hotel in hoteis:
             if hotel['hotel_id'] == hotel_id:
                 return hotel
+        return None
+
+    def get(self, hotel_id):
+        hotel = self.encontrar_hotel(hotel_id)
+
+        if hotel:
+            return hotel
 
         return {'message': 'Hotel não encontrado.'}, 404
 
     def post(self, hotel_id):
-        argumentos = reqparse.RequestParser()
-        argumentos.add_argument('nome')
-        argumentos.add_argument('estrelas')
-        argumentos.add_argument('diaria')
-        argumentos.add_argument('cidade')
-
-        dados = argumentos.parse_args()
+        dados = self.argumentos.parse_args()
 
         novo_hotel = {
-            'hotel_id': hotel_id,
-            'nome': dados['nome'],
-            'estrelas': dados['estrelas'],
-            'diaria': dados['diaria'],
-            'cidade': dados['cidade'],
+            'hotel_id': hotel_id, **dados
         }
 
         hoteis.append(novo_hotel)
 
         return novo_hotel, 200
 
-    def put(self):
-        pass
+    def put(self, hotel_id):
+        dados = self.argumentos.parse_args()
 
-    def delete(self):
-        pass
+        novo_hotel = {
+            'hotel_id': hotel_id, **dados
+        }
+
+        hotel = self.encontrar_hotel(hotel_id)
+
+        if hotel:
+            hotel.update(novo_hotel)
+            return novo_hotel, 200
+
+        hoteis.append(novo_hotel)
+
+        return novo_hotel, 201
+
+    def delete(self, hotel_id):
+        global hoteis
+
+        hoteis = [hotel for hotel in hoteis if hotel['hotel_id'] != hotel_id]
+
+        return hoteis
