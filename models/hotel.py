@@ -16,12 +16,11 @@ class HotelModel:
         self.diaria = diaria,
         self.cidade = cidade
 
-    # TODO: Corrigir: nome e diaria estão recebendo tuplas
     def json(self):
         return {
             'hotel_id': self.hotel_id,
-            'nome': self.nome[0],
+            'nome': self.nome,
             'estrelas': self.estrelas,
-            'diaria': self.diaria[0],
+            'diaria': self.diaria,
             'cidade': self.cidade
         }

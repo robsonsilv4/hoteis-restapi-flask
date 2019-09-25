@@ -56,7 +56,7 @@ class Hotel(Resource):
         return {'message': 'Hotel não encontrado.'}, 404
 
     def post(self, hotel_id):
-        dados = self.argumentos.parse_args()
+        dados = Hotel.argumentos.parse_args()
 
         hotel_objeto = HotelModel(hotel_id, **dados)
 
@@ -67,7 +67,7 @@ class Hotel(Resource):
         return novo_hotel, 201
 
     def put(self, hotel_id):
-        dados = self.argumentos.parse_args()
+        dados = Hotel.argumentos.parse_args()
 
         hotel_objeto = HotelModel(hotel_id, **dados)
         novo_hotel = hotel_objeto.json()
