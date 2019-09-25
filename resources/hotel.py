@@ -59,7 +59,7 @@ class Hotel(Resource):
         dados = self.argumentos.parse_args()
 
         hotel_objeto = HotelModel(hotel_id, **dados)
-        print(hotel_objeto.json())
+
         novo_hotel = hotel_objeto.json()
 
         hoteis.append(novo_hotel)
