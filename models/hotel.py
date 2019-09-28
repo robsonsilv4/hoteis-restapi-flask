@@ -33,6 +33,10 @@ class HotelModel(banco.Model):
         self.diaria = diaria
         self.cidade = cidade
 
+    def remover_hotel(self):
+        banco.session.delete(self)
+        banco.session.commit()
+
     def json(self):
         return {
             'hotel_id': self.hotel_id,

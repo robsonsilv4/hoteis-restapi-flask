@@ -2,34 +2,10 @@ from flask_restful import Resource, reqparse
 
 from models.hotel import HotelModel
 
-hoteis = [
-    {
-        'hotel_id': 1,
-        'nome': 'Hotel 1',
-        'estrelas': 4.3,
-        'diaria': 420.34,
-        'cidade': 'Fortaleza'
-    },
-    {
-        'hotel_id': 2,
-        'nome': 'Hotel 2',
-        'estrelas': 4.4,
-        'diaria': 380.90,
-        'cidade': 'Pacoti'
-    },
-    {
-        'hotel_id': 3,
-        'nome': 'Hotel 3',
-        'estrelas': 4.3,
-        'diaria': 320.20,
-        'cidade': 'Quixadá'
-    },
-]
-
 
 class Hoteis(Resource):
     def get(self):
-        return {'hoteis': hoteis}
+        return {'hoteis': [hotel.json() for hotel in HotelModel.query.all()]}
 
 
 class Hotel(Resource):
@@ -65,8 +41,8 @@ class Hotel(Resource):
         return hotel.json(), 201
 
     def delete(self, hotel_id):
-        global hoteis
-
-        hoteis = [hotel for hotel in hoteis if hotel['hotel_id'] != hotel_id]
-
-        return hoteis
+        hotel = HotelModel.encontrar_hotel(hotel_id)
+        if hotel:
+            hotel.remover_hotel()
+            return {'message': f'Removido hotel com o id {hotel_id}.'}
+        return {'message': f'Hotel com id {hotel_id} não encontrado.'}, 404
