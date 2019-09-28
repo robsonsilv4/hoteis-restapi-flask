@@ -28,51 +28,38 @@ hoteis = [
 
 
 class Hoteis(Resource):
-
     def get(self):
         return {'hoteis': hoteis}
 
 
 class Hotel(Resource):
-
-    argumentos = reqparse.RequestParser()
-    argumentos.add_argument('nome')
-    argumentos.add_argument('estrelas')
-    argumentos.add_argument('diaria')
-    argumentos.add_argument('cidade')
-
-    def encontrar_hotel(self, hotel_id):
-        for hotel in hoteis:
-            if hotel['hotel_id'] == hotel_id:
-                return hotel
-        return None
+    atributos = reqparse.RequestParser()
+    atributos.add_argument('nome')
+    atributos.add_argument('estrelas')
+    atributos.add_argument('diaria')
+    atributos.add_argument('cidade')
 
     def get(self, hotel_id):
-        hotel = self.encontrar_hotel(hotel_id)
-
+        hotel = HotelModel.encontrar_hotel(hotel_id)
         if hotel:
             return hotel
-
         return {'message': 'Hotel não encontrado.'}, 404
 
     def post(self, hotel_id):
-        dados = Hotel.argumentos.parse_args()
-
-        hotel_objeto = HotelModel(hotel_id, **dados)
-
-        novo_hotel = hotel_objeto.json()
-
-        hoteis.append(novo_hotel)
-
-        return novo_hotel, 201
+        if HotelModel.encontrar_hotel(hotel_id):
+            return {'message': f'Hotel com id {hotel_id} não encontrado.'}, 400
+        dados = Hotel.atributos.parse_args()
+        hotel = HotelModel(hotel_id, **dados)
+        hotel.salvar_hotel()
+        return hotel.json(), 201
 
     def put(self, hotel_id):
-        dados = Hotel.argumentos.parse_args()
+        dados = Hotel.atributos.parse_args()
 
         hotel_objeto = HotelModel(hotel_id, **dados)
         novo_hotel = hotel_objeto.json()
 
-        hotel = self.encontrar_hotel(hotel_id)
+        hotel = Hotel.encontrar_hotel(hotel_id)
 
         if hotel:
             hotel.update(novo_hotel)

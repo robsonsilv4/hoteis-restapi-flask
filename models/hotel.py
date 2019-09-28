@@ -1,7 +1,7 @@
 from sql_alchemy import banco
 
 
-class HotelModel:
+class HotelModel(banco.Model):
     __tablename__ = 'hoteis'
     hotel_id = banco.Column(banco.Integer, primary_key=True)
     nome = banco.Column(banco.String(80))
@@ -11,10 +11,21 @@ class HotelModel:
 
     def __init__(self, hotel_id, nome, estrelas, diaria, cidade):
         self.hotel_id = hotel_id
-        self.nome = nome,
+        self.nome = nome
         self.estrelas = estrelas
-        self.diaria = diaria,
+        self.diaria = diaria
         self.cidade = cidade
+
+    @classmethod
+    def encontrar_hotel(cls, hotel_id):
+        hotel = cls.query.filter_by(hotel_id=hotel_id).first()
+        if hotel:
+            return hotel
+        return None
+
+    def salvar_hotel(self):
+        banco.session.add(self)
+        banco.session.commit()
 
     def json(self):
         return {
