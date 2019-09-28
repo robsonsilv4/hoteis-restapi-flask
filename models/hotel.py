@@ -27,6 +27,12 @@ class HotelModel(banco.Model):
         banco.session.add(self)
         banco.session.commit()
 
+    def atualizar_hotel(self, nome, estrelas, diaria, cidade):
+        self.nome = nome
+        self.estrelas = estrelas
+        self.diaria = diaria
+        self.cidade = cidade
+
     def json(self):
         return {
             'hotel_id': self.hotel_id,
