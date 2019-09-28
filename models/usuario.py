@@ -7,7 +7,7 @@ class UsuarioModel(banco.Model):
     email = banco.Column(banco.String(40))
     senha = banco.Column(banco.String(40))
 
-    def __init__(self, hotel_id, email, senha):
+    def __init__(self, email, senha):
         self.email = email
         self.senha = senha
 
@@ -18,7 +18,14 @@ class UsuarioModel(banco.Model):
             return usuario
         return None
 
-    def salvar_hotel(self):
+    @classmethod
+    def encontrar_por_email(cls, email):
+        usuario = cls.query.filter_by(email=email).first()
+        if usuario:
+            return usuario
+        return None
+
+    def salvar_usuario(self):
         banco.session.add(self)
         banco.session.commit()
 
