@@ -10,8 +10,10 @@ class Hoteis(Resource):
 
 class Hotel(Resource):
     atributos = reqparse.RequestParser()
-    atributos.add_argument('nome')
-    atributos.add_argument('estrelas')
+    atributos.add_argument('nome', type=str, required=True,
+                           help='O campo nome é obrigatório.')
+    atributos.add_argument('estrelas', type=float, required=True,
+                           help='O campo estrelas é obrigatório.')
     atributos.add_argument('diaria')
     atributos.add_argument('cidade')
 
@@ -26,7 +28,10 @@ class Hotel(Resource):
             return {'message': f'Hotel com id {hotel_id} não encontrado.'}, 400
         dados = Hotel.atributos.parse_args()
         hotel = HotelModel(hotel_id, **dados)
-        hotel.salvar_hotel()
+        try:
+            hotel.salvar_hotel()
+        except:
+            return {'message': 'Ocorreu um erro ao salvar o hotel.'}, 500
         return hotel.json(), 201
 
     def put(self, hotel_id):
@@ -37,12 +42,18 @@ class Hotel(Resource):
             hotel_encontrado.salvar_hotel()
             return hotel_encontrado.json(), 200
         hotel = HotelModel(hotel_id, **dados)
-        hotel.salvar_hotel()
+        try:
+            hotel.salvar_hotel()
+        except:
+            return {'message': 'Ocorreu um erro ao salvar o hotel.'}, 500
         return hotel.json(), 201
 
     def delete(self, hotel_id):
         hotel = HotelModel.encontrar_hotel(hotel_id)
         if hotel:
-            hotel.remover_hotel()
+            try:
+                hotel.remover_hotel()
+            except:
+                return {'message': 'Ocorreu um erro ao remover o hotel.'}, 500
             return {'message': f'Removido hotel com o id {hotel_id}.'}
         return {'message': f'Hotel com id {hotel_id} não encontrado.'}, 404
