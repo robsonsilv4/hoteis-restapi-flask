@@ -1,4 +1,4 @@
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required
 from flask_restful import Resource, reqparse
 from werkzeug.security import safe_str_cmp
 
@@ -39,6 +39,7 @@ class Usuario(Resource):
             return usuario.json()
         return {'message': 'Usuário não encontrado.'}, 404
 
+    @jwt_required
     def delete(self, usuario_id):
         usuario = UsuarioModel.encontrar_usuario(usuario_id=usuario_id)
         if usuario:
