@@ -1,7 +1,8 @@
-from flask_jwt_extended import create_access_token, jwt_required
+from flask_jwt_extended import create_access_token, get_raw_jwt, jwt_required
 from flask_restful import Resource, reqparse
 from werkzeug.security import safe_str_cmp
 
+from blacklist import BLACKLIST
 from models.usuario import UsuarioModel
 
 atributos = reqparse.RequestParser()
@@ -30,6 +31,14 @@ class UsuarioLogin(Resource):
             token_de_acesso = create_access_token(identity=usuario.usuario_id)
             return {'access_token': token_de_acesso}, 200
         return {'message': 'O email ou senha estão incorretos.'}, 401
+
+
+class UsuarioLogout(Resource):
+    @jwt_required
+    def post(self):
+        jwt_id = get_raw_jwt()['jti']
+        BLACKLIST.add(jwt_required)
+        return {'message': 'Deslogado com sucesso.'}, 200
 
 
 class Usuario(Resource):
