@@ -4,6 +4,7 @@ from flask_restful import Api
 
 from blacklist import BLACKLIST
 from resources.hotel import Hoteis, Hotel
+from resources.sites import Site, Sites
 from resources.usuario import (Usuario, UsuarioCadastro, UsuarioLogin,
                                UsuarioLogout)
 
@@ -37,6 +38,8 @@ api.add_resource(Usuario, '/usuarios/<int:usuario_id>')
 api.add_resource(UsuarioCadastro, '/cadastro')
 api.add_resource(UsuarioLogin, '/login')
 api.add_resource(UsuarioLogout, '/logout')
+api.add_resource(Sites, '/sites')
+api.add_resource(Site, '/sites/<url>')
 
 if __name__ == "__main__":
     from sql_alchemy import banco

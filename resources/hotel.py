@@ -4,28 +4,9 @@ from flask_jwt_extended import jwt_required
 from flask_restful import Resource, reqparse
 
 from models.hotel import HotelModel
-
-
-def normalizar_path_params(cidade=None, estrelas_min=0, estrelas_max=5, diaria_min=0, diaria_max=10000, limit=50, offset=0, **dados):
-    if cidade:
-        return {
-            'estrelas_min': estrelas_min,
-            'estrelas_max': estrelas_max,
-            'diaria_min': diaria_min,
-            'diaria_max': diaria_max,
-            'cidade': cidade,
-            'limit': limit,
-            'offset': offset
-        }
-    return {
-        'estrelas_min': estrelas_min,
-        'estrelas_max': estrelas_max,
-        'diaria_min': diaria_min,
-        'diaria_max': diaria_max,
-        'limit': limit,
-        'offset': offset
-    }
-
+from models.site import SiteModel
+from resources.filtros import (consulta_com_cidade, consulta_sem_cidade,
+                               normalizar_path_params)
 
 path_params = reqparse.RequestParser()
 path_params.add_argument('cidade', type=str)
@@ -47,19 +28,11 @@ class Hoteis(Resource):
         parametros = normalizar_path_params(**dados_validos)
 
         if not parametros.get('cidade'):
-            consulta = 'SELECT * FROM hoteis \
-                WHERE (estrelas >= ? and estrelas <= ?) \
-                and (diaria >= ? and diaria <= ?) \
-                LIMIT ? OFFSET ?'
             tupla = tuple([parametros[chave] for chave in parametros])
-            resultado = cursor.execute(consulta, tupla)
+            resultado = cursor.execute(consulta_sem_cidade, tupla)
         else:
-            consulta = 'SELECT * FROM hoteis \
-                WHERE (estrelas >= ? and estrelas <= ?) \
-                and (diaria >= ? and diaria <= ?) \
-                and cidade = ? LIMIT ? OFFSET ?'
             tupla = tuple([parametros[chave] for chave in parametros])
-            resultado = cursor.execute(consulta, tupla)
+            resultado = cursor.execute(consulta_com_cidade, tupla)
 
         hoteis = []
         for linha in resultado:
@@ -68,7 +41,8 @@ class Hoteis(Resource):
                 'nome': linha[1],
                 'estrelas': linha[2],
                 'cidade': linha[3],
-                'diaria': linha[4]
+                'diaria': linha[4],
+                'site_id': linha[5],
             })
         return {'hoteis': hoteis}
 
@@ -81,6 +55,8 @@ class Hotel(Resource):
                            help='O campo estrelas é obrigatório.')
     atributos.add_argument('diaria')
     atributos.add_argument('cidade')
+    atributos.add_argument('site_id', type=int, required=True,
+                           help='Cada hotel precisa estar associado a um site.')
 
     def get(self, hotel_id):
         hotel = HotelModel.encontrar_hotel(hotel_id)
@@ -94,6 +70,10 @@ class Hotel(Resource):
             return {'message': f'Hotel com id {hotel_id} não encontrado.'}, 400
         dados = Hotel.atributos.parse_args()
         hotel = HotelModel(hotel_id, **dados)
+
+        if not SiteModel.encontrar_por_id(dados['site_id']):
+            return {'message': 'O hotel precisa estar associado a um site id.'}, 400
+
         try:
             hotel.salvar_hotel()
         except:
